@@ -1,4 +1,5 @@
-﻿using MiniProject3;
+﻿using System.Collections.Generic;
+using MiniProject3;
 
 // Add 3 offices
 Office officeSWE = new Office("SWE", 10.93m, "SEK");
@@ -144,95 +145,119 @@ static void AddForOffice(ref Office office)
     }
 }
 
-static void ListAssetsInOffice(ref Office office)
+static void PrintList(ref List<Asset> sortedAssets, ref DateOnly endOfLife)
 {
-    Console.Clear();
-    Console.WriteLine("How would you like to sort the list?");
-    Console.WriteLine("[1] By Asset Type");
-    Console.WriteLine("[2] By Purchase Date");
-
-    DateOnly endOfLife = DateOnly.FromDateTime(DateTime.Now).AddMonths(-36);
-    List<Asset> sortedAssets = new List<Asset>(office.Assets);
-
-    ConsoleKey key = Console.ReadKey().Key;
-
-    switch (key)
-    {
-        case ConsoleKey.D1:
-            sortedAssets = [.. sortedAssets.OrderBy(a => a.Type)];
-            break;
-        case ConsoleKey.D2:
-            sortedAssets = [.. sortedAssets.OrderBy(a => a.PurchaseDate)];
-            break;
-    }
-
-    Console.WriteLine("| {0, -20} | {1, -20} | {2, -10} | {3, -10} | {4, -15}",
-        "Manufacturer:", "Model name:", "Price:", "Currency:", "Date:");
+    Console.WriteLine("| {0, -15} | {1, -20} | {2, -20} | {3, -10} | {4, -10} | {5, -15}",
+            "Asset type:", "Manufacturer:", "Model name:", "Price:", "Currency:", "Date:");
     Console.WriteLine(new string('-', 95));
 
     foreach (Asset asset in sortedAssets)
     {
         if (asset.PurchaseDate < endOfLife.AddMonths(3))
-        {
             Console.ForegroundColor = ConsoleColor.Red;
-        }
         else if (asset.PurchaseDate < endOfLife.AddMonths(6))
-        {
             Console.ForegroundColor = ConsoleColor.Yellow;
-        }
 
-
-        Console.WriteLine("| {0, -20} | {1, -20} | {2, -10} | {3, -10} | {4, -15}",
-            asset.Manufacturer, asset.ModelName, asset.Price, asset.Currency, asset.PurchaseDate.ToString());
+        Console.WriteLine("| {0, -15} | {1, -20} | {2, -20} | {3, -10} | {4, -10} | {5, -15}",
+            asset.Type, asset.Manufacturer, asset.ModelName, asset.Price, asset.Currency, asset.PurchaseDate.ToString());
         Console.ResetColor();
     }
-    Console.ReadKey();
+}
+static void PrintListAll(ref List<Asset> sortedAssets, ref DateOnly endOfLife)
+{
+    Console.WriteLine("| {0, -10} | {1, -20} | {2, -20} | {3, -10} | {4, -10} | {5, -15}",
+            "Office:", "Manufacturer:", "Model name:", "Price:", "Currency:", "Date:");
+    Console.WriteLine(new string('-', 95));
+
+    foreach (Asset asset in sortedAssets)
+    {
+        if (asset.PurchaseDate < endOfLife.AddMonths(3))
+            Console.ForegroundColor = ConsoleColor.Red;
+        else if (asset.PurchaseDate < endOfLife.AddMonths(6))
+            Console.ForegroundColor = ConsoleColor.Yellow;
+
+        Console.WriteLine("| {0, -10} | {1, -20} | {2, -20} | {3, -10} | {4, -10} | {5, -15}",
+            asset.Office, asset.Manufacturer, asset.ModelName, asset.Price, asset.Currency, asset.PurchaseDate.ToString());
+
+        Console.ResetColor();
+    }
+}
+static void PrintSortOptions()
+{
+    Console.WriteLine("How would you like to sort the list?");
+    Console.WriteLine("[1] By Asset Type");
+    Console.WriteLine("[2] By Purchase Date");
+    Console.WriteLine("[ESC] Go Back");
+}
+static void PrintSortOptionsAll()
+{
+    Console.WriteLine("How would you like to sort the list?");
+    Console.WriteLine("[1] By Office");
+    Console.WriteLine("[2] By Purchase Date");
+    Console.WriteLine("[ESC] Go Back");
+}
+
+
+static void ListAssetsInOffice(ref Office office)
+{
+    DateOnly endOfLife = DateOnly.FromDateTime(DateTime.Now).AddMonths(-36);
+    List<Asset> sortedAssets = new(office.Assets.OrderBy(a => a.Type));
+
+    bool stay = true;
+    while (stay)
+    {
+        Console.Clear();
+        PrintSortOptions();
+        PrintList(ref sortedAssets, ref endOfLife);
+
+        ConsoleKey key = Console.ReadKey().Key;
+
+        switch (key)
+        {
+            case ConsoleKey.D1:
+                sortedAssets = [.. sortedAssets.OrderBy(a => a.Type)];
+                break;
+            case ConsoleKey.D2:
+                sortedAssets = [.. sortedAssets.OrderBy(a => a.PurchaseDate)];
+                break;
+            case ConsoleKey.Escape:
+                stay = false;
+                continue;
+        }
+    }
 }
 
 static void ListAllAssets(ref List<Office> officeList)
 {
     Console.Clear();
-    Console.WriteLine("How would you like to sort the list?");
-    Console.WriteLine("[1] By Office");
-    Console.WriteLine("[2] By Purchase Date");
+    PrintSortOptionsAll();
 
     DateOnly endOfLife = DateOnly.FromDateTime(DateTime.Now).AddMonths(-36);
-
     List<Asset> sortedAssets = officeList.SelectMany(o => o.Assets).ToList();
+    sortedAssets = [.. sortedAssets.OrderBy(a => a.Office)];
 
-    ConsoleKey key = Console.ReadKey().Key;
-
-    switch (key)
+    bool stay = true;
+    while (stay)
     {
-        case ConsoleKey.D1:
-            sortedAssets = [.. sortedAssets.OrderBy(a => a.Office)];
-            break;
-        case ConsoleKey.D2:
-            sortedAssets = [.. sortedAssets.OrderBy(a => a.PurchaseDate)];
-            break;
-    }
-    Console.WriteLine();
-    Console.WriteLine("| {0, -10} | {1, -20} | {2, -20} | {3, -10} | {4, -10} | {5, -15}", 
-        "Office:", "Manufacturer:", "Model name:", "Price:", "Currency:", "Date:");
-    Console.WriteLine(new string('-', 95));
+        Console.Clear();
+        PrintSortOptionsAll();
+        PrintListAll(ref sortedAssets, ref endOfLife);
 
-    foreach (Asset asset in sortedAssets)
-    {
-        if (asset.PurchaseDate < endOfLife.AddMonths(3))
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-        }
-        else if (asset.PurchaseDate < endOfLife.AddMonths(6))
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-        }
-        
-        Console.WriteLine("| {0, -10} | {1, -20} | {2, -20} | {3, -10} | {4, -10} | {5, -15}", 
-            asset.Office, asset.Manufacturer, asset.ModelName, asset.Price, asset.Currency, asset.PurchaseDate.ToString());
+        ConsoleKey key = Console.ReadKey().Key;
 
-        Console.ResetColor();
+        switch (key)
+        {
+            case ConsoleKey.D1:
+                sortedAssets = [.. sortedAssets.OrderBy(a => a.Office)];
+                break;
+            case ConsoleKey.D2:
+                sortedAssets = [.. sortedAssets.OrderBy(a => a.PurchaseDate)];
+                break;
+            case ConsoleKey.Escape:
+                stay = false;
+                continue;
+        }
     }
-    Console.ReadKey();
 }
 
 
