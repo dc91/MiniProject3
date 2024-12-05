@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using MiniProject3;
 
 // Add 3 offices
@@ -32,17 +33,19 @@ officeFIN.AddAsset(new MobilePhone("Nokia", "3310", 99.0m, "EUR", new DateOnly(1
 
 bool stay = true;
 
+
 while (stay)
 {
-	Console.Clear();
-	MainMenuPrint();
+    ClearConsole();// Otherwise first letter disapears. some buffer issue to do with inputs like ReadKey()
+    PrintMainMenu();
+    Console.CursorVisible = false;
     Office? chosenOffice = null;
     ConsoleKey key = Console.ReadKey().Key;
 
 	switch (key)
 	{
 		case ConsoleKey.D1:
-			chosenOffice = ChooseOffice(ref officeList);
+            chosenOffice = ChooseOffice(ref officeList);
             if (chosenOffice != null)
                 AddForOffice(ref chosenOffice);           
             break;
@@ -61,6 +64,7 @@ while (stay)
 }
 
 
+
 static Office? ChooseOffice(ref List<Office> officeList)
 {
 	int selectedOffice = 0;
@@ -69,7 +73,7 @@ static Office? ChooseOffice(ref List<Office> officeList)
     while (stay)
     {
         Console.Clear();
-        Console.WriteLine("Which office?");
+        Console.WriteLine("Which office?\n");
 
         for (int i = 0; i < officeList.Count; i++)
         {
@@ -110,38 +114,209 @@ static Office? ChooseOffice(ref List<Office> officeList)
 static void AddForOffice(ref Office office)
 {
     Console.Clear();
-    Console.WriteLine("Laptop or MobilePhone: ");
-    string assetType = Console.ReadLine();
-    Console.WriteLine("Manufacturer: ");
-    string assetManufacturer = Console.ReadLine();
-    Console.WriteLine("Model name: ");
-    string assetModelName = Console.ReadLine();
-    Console.WriteLine("Price: ");
-    decimal assetPrice = Convert.ToDecimal(Console.ReadLine());
-    Console.WriteLine("Currency: ");
-    string priceCurrency = Console.ReadLine();
-    Console.WriteLine("Purchase date: ");
-    DateOnly purchaseDate = DateOnly.Parse(Console.ReadLine());
+    Console.WriteLine($"Adding an Asset for {office.Name} office. Type \'CANCEL\' in any input to cancel\n");
+    List<string> types = ["Laptop", "MobilePhone"];
 
-    if (priceCurrency == "usd")
+    int selectedType = 0;
+
+    bool stay = true;
+    while (stay)
     {
-        assetPrice = office.ConvertPriceFromUSD(assetPrice);
-        priceCurrency = office.Currency;
+        Console.CursorVisible = false;
+        string? assetType = SelectAssetType(types, ref selectedType);
+        if (assetType == null) break; 
+        Console.CursorVisible = true;
+
+        Console.WriteLine();
+
+        string? assetManufacturer = GetInput("Manufacturer: ");
+        if (assetManufacturer == null) break;
+
+        string? assetModelName = GetInput("Model name: ");
+        if (assetModelName == null) break;
+
+        decimal assetPrice = GetValidDecimal("Price (Expecting numbers with eventual comma to signify decimals): ");
+        if (assetPrice == -1)
+            break;
+
+        string? priceCurrency = GetValidCurrency("Currency (USD, EUR or SEK): ");
+        if (priceCurrency == null)
+            break;
+
+        DateOnly purchaseDate = GetValidDate("Purchase Date (yyyy-mm-dd): ");
+        if (purchaseDate == default)
+            break;
+
+        if (priceCurrency == "USD")
+        {
+            assetPrice = office.ConvertPriceFromUSD(Convert.ToDecimal(assetPrice));
+            priceCurrency = office.Currency;
+        }
+
+        if (assetType == "Laptop")
+        {
+            office.AddAsset(new Laptop(assetManufacturer, assetModelName, assetPrice, priceCurrency, purchaseDate, office.Name));
+            Console.WriteLine("Laptop added");
+            Console.ReadKey();
+            return;
+        }
+        else if (assetType == "MobilePhone")
+        {
+            office.AddAsset(new MobilePhone(assetManufacturer, assetModelName, assetPrice, priceCurrency, purchaseDate, office.Name));
+            Console.WriteLine("MobilePhone added");
+            Console.ReadKey();
+            return;
+        }
     }
 
-    if (assetType == "Laptop")
+}
+
+static string? SelectAssetType(List<string> types, ref int selectedType)
+{
+    while (true)
     {
-        office.AddAsset(new Laptop(assetManufacturer, assetModelName, assetPrice, priceCurrency, purchaseDate, office.Name));
-        Console.WriteLine("Laptop added");
-        Console.ReadKey();
-        return;
+        Console.Clear();
+        Console.WriteLine("Laptop or Mobile phone: ");
+        for (int i = 0; i < types.Count; i++)
+        {
+            if (i == selectedType)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write(types[i] + "\t");
+                Console.ResetColor();
+            }
+            else
+            {
+                Console.Write(types[i] + "\t");
+            }
+        }
+
+        ConsoleKey key = Console.ReadKey().Key;
+        switch (key)
+        {
+            case ConsoleKey.RightArrow:
+                if (selectedType < types.Count - 1)
+                    selectedType++;
+                break;
+            case ConsoleKey.LeftArrow:
+                if (selectedType > 0)
+                    selectedType--;
+                break;
+            case ConsoleKey.Enter:
+                return types[selectedType];
+            case ConsoleKey.Escape:
+                return null;
+        }
     }
-    else if (assetType == "MobilePhone")
+}
+
+
+// Input validation
+static decimal GetValidDecimal(string prompt)
+{
+    while (true)
     {
-        office.AddAsset(new MobilePhone(assetManufacturer, assetModelName, assetPrice, priceCurrency, purchaseDate, office.Name));
-        Console.WriteLine("MobilePhone added");
-        Console.ReadKey();
-        return;
+        string? input = GetInput(prompt);
+        if (input == null)
+            return -1;
+
+        if (decimal.TryParse(input, out decimal result))
+            return result;
+
+        Console.SetCursorPosition(0, Console.CursorTop - 2);
+        Console.WriteLine(new string(' ', Console.WindowWidth));
+        Console.WriteLine(new string(' ', Console.WindowWidth));
+        Console.SetCursorPosition(0, Console.CursorTop - 2);
+        Console.Write("Price not recognized. ");
+    }
+}
+static string? GetValidCurrency(string prompt)
+{
+    while (true)
+    {
+        string? input = GetInput(prompt)?.ToUpper();
+        if (input == null)
+            return null;
+
+        if (input == "USD" || input == "EUR" || input == "SEK")
+            return input;
+
+        Console.SetCursorPosition(0, Console.CursorTop - 2);
+        Console.WriteLine(new string(' ', Console.WindowWidth));
+        Console.WriteLine(new string(' ', Console.WindowWidth));
+        Console.SetCursorPosition(0, Console.CursorTop - 2);
+        Console.Write("Currency not recognized. ");
+    }
+}
+static DateOnly GetValidDate(string prompt)
+{
+    while (true)
+    {
+        string? input = GetInput(prompt)?.Trim();
+        if (input == null)
+            return default;
+
+        if (DateOnly.TryParse(input, out DateOnly result))
+            return result;
+
+
+        Console.SetCursorPosition(0, Console.CursorTop - 2);
+        Console.WriteLine(new string(' ', Console.WindowWidth));
+        Console.WriteLine(new string(' ', Console.WindowWidth));
+        Console.SetCursorPosition(0, Console.CursorTop - 2);
+        Console.Write("Date not recognized. ");
+    }
+}
+static string? GetInput(string prompt)
+{
+    
+    Console.WriteLine(prompt);
+    while (true)
+    {
+        string? input = Console.ReadLine();
+
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            Console.SetCursorPosition(0, Console.CursorTop - 2);
+            Console.WriteLine(new string(' ', Console.WindowWidth));
+            Console.SetCursorPosition(0, Console.CursorTop - 1);
+            Console.WriteLine($"Does not accept empty input. {prompt}");
+            continue;
+        }
+        if (input.Trim().Equals("CANCEL"))
+            return null;
+
+        return input.Trim();
+    }
+}
+
+// Task 2 View assets from selected office
+static void ListAssetsInOffice(ref Office office)
+{
+    DateOnly endOfLife = DateOnly.FromDateTime(DateTime.Now).AddMonths(-36);
+    List<Asset> sortedAssets = new(office.Assets.OrderBy(a => a.Type));
+
+    bool stay = true;
+    while (stay)
+    {
+        Console.Clear();
+        PrintSortOptions(office);
+        PrintList(ref sortedAssets, ref endOfLife);
+
+        ConsoleKey key = Console.ReadKey().Key;
+
+        switch (key)
+        {
+            case ConsoleKey.D1:
+                sortedAssets = [.. sortedAssets.OrderBy(a => a.Type)];
+                break;
+            case ConsoleKey.D2:
+                sortedAssets = [.. sortedAssets.OrderBy(a => a.PurchaseDate)];
+                break;
+            case ConsoleKey.Escape:
+                stay = false;
+                continue;
+        }
     }
 }
 
@@ -163,70 +338,17 @@ static void PrintList(ref List<Asset> sortedAssets, ref DateOnly endOfLife)
         Console.ResetColor();
     }
 }
-static void PrintListAll(ref List<Asset> sortedAssets, ref DateOnly endOfLife)
+
+static void PrintSortOptions(Office office)
 {
-    Console.WriteLine("| {0, -10} | {1, -20} | {2, -20} | {3, -10} | {4, -10} | {5, -15}",
-            "Office:", "Manufacturer:", "Model name:", "Price:", "Currency:", "Date:");
-    Console.WriteLine(new string('-', 95));
-
-    foreach (Asset asset in sortedAssets)
-    {
-        if (asset.PurchaseDate < endOfLife.AddMonths(3))
-            Console.ForegroundColor = ConsoleColor.Red;
-        else if (asset.PurchaseDate < endOfLife.AddMonths(6))
-            Console.ForegroundColor = ConsoleColor.Yellow;
-
-        Console.WriteLine("| {0, -10} | {1, -20} | {2, -20} | {3, -10} | {4, -10} | {5, -15}",
-            asset.Office, asset.Manufacturer, asset.ModelName, asset.Price, asset.Currency, asset.PurchaseDate.ToString());
-
-        Console.ResetColor();
-    }
-}
-static void PrintSortOptions()
-{
-    Console.WriteLine("How would you like to sort the list?");
+    Console.WriteLine($"How would you like to sort the assets of {office.Name} office?");
     Console.WriteLine("[1] By Asset Type");
     Console.WriteLine("[2] By Purchase Date");
     Console.WriteLine("[ESC] Go Back");
-}
-static void PrintSortOptionsAll()
-{
-    Console.WriteLine("How would you like to sort the list?");
-    Console.WriteLine("[1] By Office");
-    Console.WriteLine("[2] By Purchase Date");
-    Console.WriteLine("[ESC] Go Back");
+    Console.WriteLine();
 }
 
-
-static void ListAssetsInOffice(ref Office office)
-{
-    DateOnly endOfLife = DateOnly.FromDateTime(DateTime.Now).AddMonths(-36);
-    List<Asset> sortedAssets = new(office.Assets.OrderBy(a => a.Type));
-
-    bool stay = true;
-    while (stay)
-    {
-        Console.Clear();
-        PrintSortOptions();
-        PrintList(ref sortedAssets, ref endOfLife);
-
-        ConsoleKey key = Console.ReadKey().Key;
-
-        switch (key)
-        {
-            case ConsoleKey.D1:
-                sortedAssets = [.. sortedAssets.OrderBy(a => a.Type)];
-                break;
-            case ConsoleKey.D2:
-                sortedAssets = [.. sortedAssets.OrderBy(a => a.PurchaseDate)];
-                break;
-            case ConsoleKey.Escape:
-                stay = false;
-                continue;
-        }
-    }
-}
-
+// Task 3 View assets from all offices
 static void ListAllAssets(ref List<Office> officeList)
 {
     Console.Clear();
@@ -255,13 +377,43 @@ static void ListAllAssets(ref List<Office> officeList)
                 break;
             case ConsoleKey.Escape:
                 stay = false;
-                continue;
+                break;
         }
     }
 }
 
+static void PrintListAll(ref List<Asset> sortedAssets, ref DateOnly endOfLife)
+{
+    Console.WriteLine("| {0, -10} | {1, -15} | {2, -20} | {3, -20} | {4, -10} | {5, -10} | {6, -15}",
+            "Office:", "Type:", "Manufacturer:", "Model name:", "Price:", "Currency:", "Date:");
+    Console.WriteLine(new string('-', 110));
 
-static void MainMenuPrint()
+    foreach (Asset asset in sortedAssets)
+    {
+        if (asset.PurchaseDate < endOfLife.AddMonths(3))
+            Console.ForegroundColor = ConsoleColor.Red;
+        else if (asset.PurchaseDate < endOfLife.AddMonths(6))
+            Console.ForegroundColor = ConsoleColor.Yellow;
+
+        Console.WriteLine("| {0, -10} | {1, -15} | {2, -20} | {3, -20} | {4, -10} | {5, -10} | {6, -15}",
+            asset.Office, asset.Type , asset.Manufacturer, asset.ModelName, asset.Price, asset.Currency, asset.PurchaseDate.ToString());
+
+        Console.ResetColor();
+    }
+}
+
+static void PrintSortOptionsAll()
+{
+    Console.WriteLine("How would you like to sort the list?");
+    Console.WriteLine("[1] By Office");
+    Console.WriteLine("[2] By Purchase Date");
+    Console.WriteLine("[ESC] Go Back");
+    Console.WriteLine();
+}
+
+// Rest
+
+static void PrintMainMenu()
 {
 	Console.WriteLine("Welcome\n\n\n");
     Console.WriteLine("[1] Add an asset to an office");
@@ -269,3 +421,16 @@ static void MainMenuPrint()
     Console.WriteLine("[3] View all assets");
     Console.WriteLine("[4] quit.");
 }
+
+static void ClearConsole()
+{
+    Process.Start(new ProcessStartInfo
+    {
+        FileName = "cmd.exe",
+        Arguments = "/C cls", // /C runs the command and exits
+        UseShellExecute = false,
+        RedirectStandardOutput = false
+    })?.WaitForExit();
+}
+
+
