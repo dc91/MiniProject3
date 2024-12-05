@@ -1,33 +1,33 @@
 ﻿using MiniProject3;
 
 // Add 3 offices
-Office officeSWE = new Office("SWE", 10.93m, "sek");
-Office officeUSA = new Office("USA", 1.0m, "usd");
-Office officeFIN = new Office("FIN", 0.95m, "eur");
+Office officeSWE = new Office("SWE", 10.93m, "SEK");
+Office officeUSA = new Office("USA", 1.0m, "USD");
+Office officeFIN = new Office("FIN", 0.95m, "EUR");
 
 List<Office> officeList = [officeSWE, officeUSA, officeFIN];
 
 // Add some assets to every office
-officeSWE.AddAsset(new Laptop("Apple", "MacBook", 49999.0m, "sek", new DateOnly(2021, 12, 22), officeSWE.Name));
-officeSWE.AddAsset(new Laptop("Apple", "MacBook", 75990.0m, "sek", new DateOnly(2022, 5, 11), officeSWE.Name));
-officeSWE.AddAsset(new Laptop("Lenovo", "Yoga 20", 18749.0m, "sek", new DateOnly(2024, 05, 15), officeSWE.Name));
-officeSWE.AddAsset(new MobilePhone("Apple", "Ipone", 19900.0m, "sek", new DateOnly(2024, 08, 13), officeSWE.Name));
-officeSWE.AddAsset(new MobilePhone("Samsung", "Galaxy S22", 18999.0m, "sek", new DateOnly(2023, 11, 08), officeSWE.Name));
-officeSWE.AddAsset(new MobilePhone("Samsung", "Galaxy S20", 19999.0m, "sek", new DateOnly(1999, 10, 17), officeSWE.Name));
+officeSWE.AddAsset(new Laptop("Apple", "MacBook", 49999.0m, "SEK", new DateOnly(2021, 12, 22), officeSWE.Name));
+officeSWE.AddAsset(new Laptop("Apple", "MacBook", 75990.0m, "SEK", new DateOnly(2022, 5, 11), officeSWE.Name));
+officeSWE.AddAsset(new Laptop("Lenovo", "Yoga 20", 18749.0m, "SEK", new DateOnly(2024, 05, 15), officeSWE.Name));
+officeSWE.AddAsset(new MobilePhone("Apple", "Ipone", 19900.0m, "SEK", new DateOnly(2024, 08, 13), officeSWE.Name));
+officeSWE.AddAsset(new MobilePhone("Samsung", "Galaxy S22", 18999.0m, "SEK", new DateOnly(2023, 11, 08), officeSWE.Name));
+officeSWE.AddAsset(new MobilePhone("Samsung", "Galaxy S20", 19999.0m, "SEK", new DateOnly(1999, 10, 17), officeSWE.Name));
 
-officeUSA.AddAsset(new Laptop("Apple", "MacBook", 2999.0m, "usd", new DateOnly(2023, 05, 22), officeUSA.Name));
-officeUSA.AddAsset(new Laptop("Lenovo", "Yoga 20", 990.0m, "usd", new DateOnly(2024, 07, 11), officeUSA.Name));
-officeUSA.AddAsset(new Laptop("Lenovo", "Yoga 20", 1259.0m, "usd", new DateOnly(2024, 05, 15), officeUSA.Name));
-officeUSA.AddAsset(new MobilePhone("Apple", "Ipone", 1990.0m, "usd", new DateOnly(2024, 08, 13), officeUSA.Name));
-officeUSA.AddAsset(new MobilePhone("Samsung", "Galaxy S21", 1899.0m, "usd", new DateOnly(2023, 11, 08), officeUSA.Name));
-officeUSA.AddAsset(new MobilePhone("Nokia", "3310", 99.0m, "usd", new DateOnly(1999, 10, 17), officeUSA.Name));
+officeUSA.AddAsset(new Laptop("Apple", "MacBook", 2999.0m, "USD", new DateOnly(2023, 05, 22), officeUSA.Name));
+officeUSA.AddAsset(new Laptop("Lenovo", "Yoga 20", 990.0m, "USD", new DateOnly(2024, 07, 11), officeUSA.Name));
+officeUSA.AddAsset(new Laptop("Lenovo", "Yoga 20", 1259.0m, "USD", new DateOnly(2024, 05, 15), officeUSA.Name));
+officeUSA.AddAsset(new MobilePhone("Apple", "Ipone", 1990.0m, "USD", new DateOnly(2024, 08, 13), officeUSA.Name));
+officeUSA.AddAsset(new MobilePhone("Samsung", "Galaxy S21", 1899.0m, "USD", new DateOnly(2023, 11, 08), officeUSA.Name));
+officeUSA.AddAsset(new MobilePhone("Nokia", "3310", 99.0m, "USD", new DateOnly(1999, 10, 17), officeUSA.Name));
 
-officeFIN.AddAsset(new Laptop("Asus", "Vivobook 16", 1599.0m, "eur", new DateOnly(2023, 05, 22), officeFIN.Name));
-officeFIN.AddAsset(new Laptop("Asus", "Vivobook 16", 1499.0m, "eur", new DateOnly(2024, 07, 11), officeFIN.Name));
-officeFIN.AddAsset(new Laptop("Asus", "Vivobook 16", 1879.0m, "eur", new DateOnly(2024, 05, 15), officeFIN.Name));
-officeFIN.AddAsset(new MobilePhone("Nokia", "3310", 1990.0m, "eur", new DateOnly(2024, 08, 13), officeFIN.Name));
-officeFIN.AddAsset(new MobilePhone("Nokia", "3310", 1899.0m, "eur", new DateOnly(2023, 11, 08), officeFIN.Name));
-officeFIN.AddAsset(new MobilePhone("Nokia", "3310", 99.0m, "eur", new DateOnly(1999, 10, 17), officeFIN.Name));
+officeFIN.AddAsset(new Laptop("Asus", "Vivobook 16", 1599.0m, "EUR", new DateOnly(2023, 05, 22), officeFIN.Name));
+officeFIN.AddAsset(new Laptop("Asus", "Vivobook 16", 1499.0m, "EUR", new DateOnly(2024, 07, 11), officeFIN.Name));
+officeFIN.AddAsset(new Laptop("Asus", "Vivobook 16", 1879.0m, "EUR", new DateOnly(2024, 05, 15), officeFIN.Name));
+officeFIN.AddAsset(new MobilePhone("Nokia", "3310", 1990.0m, "EUR", new DateOnly(2024, 08, 13), officeFIN.Name));
+officeFIN.AddAsset(new MobilePhone("Nokia", "3310", 1899.0m, "EUR", new DateOnly(2023, 11, 08), officeFIN.Name));
+officeFIN.AddAsset(new MobilePhone("Nokia", "3310", 99.0m, "EUR", new DateOnly(1999, 10, 17), officeFIN.Name));
 
 bool stay = true;
 
