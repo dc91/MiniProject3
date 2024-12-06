@@ -11,32 +11,32 @@ decimal USDSEKrate = EURSEKrate * USDEURrate;
 decimal SEKUSDrate = 1 / USDSEKrate;
 
 
-List<KeyValuePair<string, decimal>> quotesSWE = new List<KeyValuePair<string, decimal>>
-{
+List<KeyValuePair<string, decimal>> quotesSWE =
+[
     new("EURSEK", EURSEKrate),
     new("SEKEUR", SEKEURrate),
     new("USDSEK", USDSEKrate),
     new("SEKUSD", SEKUSDrate),
     new("SEKSEK", 1.0m)
-};
+];
 
-List<KeyValuePair<string, decimal>> quotesUSA = new List<KeyValuePair<string, decimal>>
-{
+List<KeyValuePair<string, decimal>> quotesUSA =
+[
     new("EURUSD", EURUSDrate),
     new("USDEUR", USDEURrate),
     new("USDSEK", USDSEKrate),
     new("SEKUSD", SEKUSDrate),
     new("USDUSD", 1.0m)
-};
+];
 
-List<KeyValuePair<string, decimal>> quotesFIN = new List<KeyValuePair<string, decimal>>
-{
+List<KeyValuePair<string, decimal>> quotesFIN =
+[
     new("EURUSD", EURUSDrate),
     new("USDEUR", USDEURrate),
     new("EURSEK", EURSEKrate),
     new("SEKEUR", SEKEURrate),
     new("EUREUR", 1.0m)
-};
+];
 
 // Add 3 offices
 Office officeSWE = new Office("SWE", quotesSWE, "SEK");
@@ -147,7 +147,7 @@ static Office? ChooseOffice(ref List<Office> officeList)
     return null;
 }
 
-void AddForOffice(ref Office office)
+static void AddForOffice(ref Office office)
 {
     Console.Clear();
     Console.WriteLine($"Adding an Asset for {office.Name} office. Type \'CANCEL\' in any input to cancel\n");
@@ -386,7 +386,7 @@ static void PrintSortOptions(Office office)
 }
 
 // Task 3 View assets from all offices
-static void ListAllAssets(ref List<Office> officeList)
+void ListAllAssets(ref List<Office> officeList)
 {
     Console.Clear();
     PrintSortOptionsAll();
@@ -419,11 +419,11 @@ static void ListAllAssets(ref List<Office> officeList)
     }
 }
 
-static void PrintListAll(ref List<Asset> sortedAssets, ref DateOnly endOfLife)
+void PrintListAll(ref List<Asset> sortedAssets, ref DateOnly endOfLife)
 {
-    Console.WriteLine("| {0, -10} | {1, -15} | {2, -20} | {3, -20} | {4, -10} | {5, -10} | {6, -15}",
-            "Office:", "Type:", "Manufacturer:", "Model name:", "Price:", "Currency:", "Date:");
-    Console.WriteLine(new string('-', 110));
+    Console.WriteLine("| {0, -10} | {1, -15} | {2, -15} | {3, -20} | {4, -15} | {5, -10} | {6, -15}",
+            "Office:", "Type:", "Manufacturer:", "Model name:", "Local price:", "USD price:", "Date:");
+    Console.WriteLine(new string('-', 115));
 
     foreach (Asset asset in sortedAssets)
     {
@@ -432,8 +432,10 @@ static void PrintListAll(ref List<Asset> sortedAssets, ref DateOnly endOfLife)
         else if (asset.PurchaseDate < endOfLife.AddMonths(6))
             Console.ForegroundColor = ConsoleColor.Yellow;
 
-        Console.WriteLine("| {0, -10} | {1, -15} | {2, -20} | {3, -20} | {4, -10} | {5, -10} | {6, -15}",
-            asset.Office, asset.Type, asset.Manufacturer, asset.ModelName, asset.Price, asset.Currency, asset.PurchaseDate.ToString());
+        Console.WriteLine("| {0, -10} | {1, -15} | {2, -15} | {3, -20} | {4, -15} | {5, -10} | {6, -15}",
+            asset.Office, asset.Type, asset.Manufacturer, asset.ModelName, Math.Round(asset.Price, 2) + " " + asset.Currency,
+            Math.Round(officeUSA.ConvertPrice(asset.Price, asset.Currency + "USD"), 2),
+            asset.PurchaseDate.ToString());
 
         Console.ResetColor();
     }
