@@ -9,15 +9,15 @@ namespace MiniProject3
     internal class Office
     {
         public string Name { get; set; }
-        public decimal ConversionRate { get; set; }
+        public List<KeyValuePair<string, decimal>> ConversionRates { get; set; }
 
         public string Currency { get; set; }
         public List<Asset> Assets { get; set; } = [];
 
-        public Office(string name, decimal conversionRate, string currency) 
+        public Office(string name, List<KeyValuePair<string, decimal>> conversionRates, string currency) 
         {
             Name = name;
-            ConversionRate = conversionRate;
+            ConversionRates = conversionRates;
             Currency = currency;
         }
 
@@ -26,14 +26,10 @@ namespace MiniProject3
             Assets.Add(asset);
         }
 
-        public decimal ConvertPriceFromUSD(decimal price)
+        public decimal ConvertPrice(decimal price, string fromToCurrency)
         {
-            return price * ConversionRate;
+           return ConversionRates.FirstOrDefault(p => p.Key == fromToCurrency).Value * price;
         }
 
-        public void UpdateCurrencyConversionRate(decimal newRate)
-        {
-            ConversionRate = newRate;
-        }
     }
 }
