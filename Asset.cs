@@ -14,8 +14,26 @@ namespace MiniProject3
         public string Currency { get; set; }
         public DateOnly PurchaseDate { get; set; }
         public string Office { get; set; }
-        public string EndOfLifeStatus { get; set; } = "Normal"; // default status
-        public abstract string Type { get; } // protected so children ca reach it
+        public string EndOfLifeStatus 
+        {
+            get
+            {
+                // Calculate the end of life status based on the purchase date
+                DateOnly currentDate = DateOnly.FromDateTime(DateTime.Now);
+                DateOnly endOfLifeDate = PurchaseDate.AddMonths(36);
+
+                if (currentDate > endOfLifeDate)
+                    return "Past End of Life";
+                else if (currentDate > endOfLifeDate.AddMonths(-3))
+                    return "3 Months Left";
+                else if (currentDate > endOfLifeDate.AddMonths(-6))
+                    return "6 Months Left";
+                else
+                    return "Normal";
+            }
+
+        }
+        public abstract string Type { get; } // protected so children can reach it
 
         public Asset(string manufacturer, string modelname, decimal price, string currency, DateOnly purchaseDate, string office)
         {
