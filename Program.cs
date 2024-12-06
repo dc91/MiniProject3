@@ -69,17 +69,18 @@ officeFIN.AddAsset(new MobilePhone("Nokia", "3310", 1899.0m, "EUR", GetRandomDat
 officeFIN.AddAsset(new MobilePhone("Nokia", "3310", 99.0m, "EUR", GetRandomDate(), officeFIN.Name));
 
 
+// Main Menu
 bool stay = true;
-while (stay)// Main Menu
+while (stay)
 {
-    ClearConsole();// Otherwise first letter disapears. some buffer issue to do with inputs like ReadKey()
+    Console.SetCursorPosition(0, 0);
+    ClearLines();
     PrintMainMenu();
 
     Console.CursorVisible = false;
     Office? chosenOffice = null;
-EnterKey:;
-    ConsoleKey key = Console.ReadKey(intercept: true).Key;
 
+    ConsoleKey key = Console.ReadKey(intercept: true).Key;
     switch (key)
     {
         case ConsoleKey.D1:
@@ -97,18 +98,10 @@ EnterKey:;
             stay = false;
             break;
         default:
-            goto EnterKey;
+            break;
     }
 }
 
-static DateOnly GetRandomDate()
-{
-    DateOnly startDate = DateOnly.FromDateTime(DateTime.Now).AddMonths(-48);
-    DateOnly endDate = DateOnly.FromDateTime(DateTime.Now).AddMonths(-12);
-    Random random = new Random();
-    int range = (endDate.ToDateTime(new TimeOnly(0, 0)) - startDate.ToDateTime(new TimeOnly(0, 0))).Days;
-    return startDate.AddDays(random.Next(range));
-}
 
 
 static Office? ChooseOffice(ref List<Office> officeList)
@@ -221,6 +214,7 @@ static void AddForOffice(ref Office office)
 
 }
 
+// Just to make user select instead of typing the type. One less possible user misstake, hopefully
 static string? SelectAssetType(List<string> types, ref int selectedType, Office office)
 {
     while (true)
@@ -386,7 +380,7 @@ void ListAssetsInOffice(ref List<Office> officeList)
     int tableStart = Console.CursorTop;
 
     while (stay)
-    {
+    {   // Sort & filter settings
         List<Asset> sortedAssets = sortingOption switch
         {
             1 => new List<Asset>(office.Assets.OrderBy(a => a.Type)),
@@ -396,61 +390,47 @@ void ListAssetsInOffice(ref List<Office> officeList)
         if (filtered)
             sortedAssets = sortedAssets.Where(a => a.EndOfLifeStatus != "Normal").ToList();
 
-        //Console.Clear();
-        //PrintSortOptions(office);
-        
-        Console.SetCursorPosition(0, tableStart);
+        Console.SetCursorPosition(0, tableStart);// instead of clearing full screen
         ClearLines();
         PrintList(ref sortedAssets, ref office);
 
-        bool validKey = false;
-        while (!validKey)
-        {
-            ConsoleKey key = Console.ReadKey(intercept: true).Key;
+        ConsoleKey key = Console.ReadKey(intercept: true).Key;
 
-            switch (key)
-            {
-                case ConsoleKey.D1:
-                    if (sortingOption == 1)
-                        break;
-                    sortingOption = 1;
-                    validKey = true;
+        switch (key)
+        {
+            case ConsoleKey.D1:
+                if (sortingOption == 1)
                     break;
-                case ConsoleKey.D2:
-                    if (sortingOption == 2)
-                        break;
-                    sortingOption = 2;
-                    validKey = true;
+                sortingOption = 1;
+                break;
+            case ConsoleKey.D2:
+                if (sortingOption == 2)
                     break;
-                case ConsoleKey.U:
-                    if (office == officeUSA)
-                        break;
-                    office = officeUSA;
-                    validKey = true;
+                sortingOption = 2;
+                break;
+            case ConsoleKey.U:
+                if (office == officeUSA)
                     break;
-                case ConsoleKey.S:
-                    if (office == officeSWE)
-                        break;
-                    office = officeSWE;
-                    validKey = true;
+                office = officeUSA;
+                break;
+            case ConsoleKey.S:
+                if (office == officeSWE)
                     break;
-                case ConsoleKey.F:
-                    if (office == officeFIN)
-                        break;
-                    office = officeFIN;
-                    validKey = true;
+                office = officeSWE;
+                break;
+            case ConsoleKey.F:
+                if (office == officeFIN)
                     break;
-                case ConsoleKey.N:
-                    filtered = !filtered; // Toggle filtering
-                    validKey = true;
-                    break;
-                case ConsoleKey.Escape:
-                    stay = false;
-                    validKey = true;
-                    break;
-                default:
-                    break;
-            }
+                office = officeFIN;
+                break;
+            case ConsoleKey.N:
+                filtered = !filtered; // Toggle filtering
+                break;
+            case ConsoleKey.Escape:
+                stay = false;
+                break;
+            default:
+                break;
         }
     }
 }
@@ -503,6 +483,10 @@ void ListAllAssets(ref List<Office> officeList)
     bool filtered = false;
     bool stay = true;
 
+    Console.Clear();
+    PrintSortOptionsAll();
+    int tableStart = Console.CursorTop;
+
     while (stay)
     {
         List<Asset> sortedAssets = sortingOption switch
@@ -515,36 +499,32 @@ void ListAllAssets(ref List<Office> officeList)
         if (filtered)
             sortedAssets = sortedAssets.Where(a => a.EndOfLifeStatus != "Normal").ToList();
 
-        Console.Clear();
-        PrintSortOptionsAll();
+        Console.SetCursorPosition(0, tableStart);// instead of clearing full screen
+        ClearLines();
         PrintListAll(ref sortedAssets);
 
-        bool validKey = false;
-        while (!validKey)
-        {
-            ConsoleKey key = Console.ReadKey(intercept: true).Key;
+        ConsoleKey key = Console.ReadKey(intercept: true).Key;
 
-            switch (key)
-            {
-                case ConsoleKey.D1:
-                    sortingOption = 1;
-                    validKey = true;
+        switch (key)
+        {
+            case ConsoleKey.D1:
+                if (sortingOption == 1)
                     break;
-                case ConsoleKey.D2:
-                    sortingOption = 2;
-                    validKey = true;
+                sortingOption = 1;
+                break;
+            case ConsoleKey.D2:
+                if (sortingOption == 2)
                     break;
-                case ConsoleKey.N:
-                    filtered = !filtered;
-                    validKey = true;
-                    break;
-                case ConsoleKey.Escape:
-                    stay = false;
-                    validKey = true;
-                    break;
-                default:
-                    break;
-            }
+                sortingOption = 2;
+                break;
+            case ConsoleKey.N:
+                filtered = !filtered;
+                break;
+            case ConsoleKey.Escape:
+                stay = false;
+                break;
+            default:
+                break;
         }
     }
 }
@@ -607,17 +587,6 @@ static void PrintMainMenu()
     
 }
 
-static void ClearConsole()
-{
-    Process.Start(new ProcessStartInfo
-    {
-        FileName = "cmd.exe",
-        Arguments = "/C cls", // /C runs the command and exits
-        UseShellExecute = false,
-        RedirectStandardOutput = false
-    })?.WaitForExit();
-}
-
 static void ClearLines()
 {
     var currPos = Console.GetCursorPosition();
@@ -626,4 +595,13 @@ static void ClearLines()
         Console.WriteLine(new string(' ', Console.WindowWidth));
     }
     Console.SetCursorPosition(currPos.Left, currPos.Top);
+}
+
+static DateOnly GetRandomDate()
+{
+    DateOnly startDate = DateOnly.FromDateTime(DateTime.Now).AddMonths(-48);
+    DateOnly endDate = DateOnly.FromDateTime(DateTime.Now).AddMonths(-12);
+    Random random = new Random();
+    int range = (endDate.ToDateTime(new TimeOnly(0, 0)) - startDate.ToDateTime(new TimeOnly(0, 0))).Days;
+    return startDate.AddDays(random.Next(range));
 }
